@@ -10,7 +10,8 @@ def pitched_roof(parent, *, x, z, width, depth, wall_top, accent, detailed,
     run = width/2+overhang
     ridge = wall_top+run*math.tan(pitch)
     # Public construction dimensions also allow independent geometry checks.
-    for key, val in (("Width", width), ("Depth", depth), ("WallTop", wall_top),
+    wall_width = width+2  # Include the one-stud wall thickness outside each side.
+    for key, val in (("Width", wall_width), ("Depth", depth), ("WallTop", wall_top),
                      ("RidgeHeight", ridge), ("CenterX", x), ("CenterZ", z)):
         v = obj(roof, "NumberValue", key)
         prop(v, "double", "Value", val)
@@ -36,16 +37,16 @@ def pitched_roof(parent, *, x, z, width, depth, wall_top, accent, detailed,
              (83, 66, 52), "wood", collide=False)
 
     part(roof, "RoofRidge", (x, ridge+.65, z), (1.65, 1.3, depth+7), (54, 62, 68), "slate", collide=False)
-    skirt = overhang*math.tan(pitch)
-    triangle_height = width/2*math.tan(pitch)
+    skirt = (overhang-1)*math.tan(pitch)
+    triangle_height = wall_width/2*math.tan(pitch)
     for end, zz in (("Front", z+depth/2), ("Rear", z-depth/2)):
         end_model = obj(roof, "Model", end+"Gable")
-        part(end_model, "GableSkirt", (x, wall_top+skirt/2, zz), (width, skirt, 2),
+        part(end_model, "GableSkirt", (x, wall_top+skirt/2, zz), (wall_width, skirt, 2),
              (169, 166, 153), "plaster")
         for side in (-1, 1):
             part(end_model, "GableTriangle",
-                 (x+side*width/4, wall_top+skirt+triangle_height/2, zz),
-                 (2, triangle_height, width/2), (169, 166, 153), "plaster",
+                 (x+side*wall_width/4, wall_top+skirt+triangle_height/2, zz),
+                 (2, triangle_height, wall_width/2), (169, 166, 153), "plaster",
                  (0, -90 if side == 1 else 90, 0), cls="WedgePart")
         part(end_model, "GableTie", (x, wall_top+.25, zz+(1.25 if end == "Front" else -1.25)),
              (width+1, .75, .5), (83, 66, 52), "wood", collide=False)

@@ -69,7 +69,8 @@ class MapTests(unittest.TestCase):
         names = [v.text for v in self.xml.findall(".//Properties/string[@name='Name']")]
         self.assertEqual(names.count('FutureBuildPlots'), 13)
         self.assertEqual(sum(n.startswith('Plot_') for n in names), 52)
-        self.assertLess(len(self.parts), 4000)
+        # Includes the coast-following enclosure, six bastions and both stairs.
+        self.assertLess(len(self.parts), 4500)
 
     def test_original_island_bases_preserved(self):
         geometry = []
@@ -177,6 +178,152 @@ class MapTests(unittest.TestCase):
         for i,a in enumerate(rects):
             for b in rects[i+1:]:
                 self.assertFalse(min(a[2],b[2])-max(a[0],b[0])>1e-6 and min(a[3],b[3])-max(a[1],b[1])>1e-6)
+
+    def test_building_shells_have_structural_corners_without_overlaid_stones(self):
+        names=[v.text for v in self.xml.findall(".//Properties/string[@name='Name']")]
+        self.assertNotIn('CornerQuoin',names)
+        self.assertNotIn('StonePlinth',names)
+        buildings=[i for i in self.xml.findall(".//Item[@class='Model']")
+                   if any(p.find("Properties/string[@name='Name']").text=='CornerPier' for p in i.findall('Item'))]
+        self.assertEqual(len(buildings),11)
+        for building in buildings:
+            shell=[]
+            corners=0
+            for item in building.findall('Item'):
+                props=item.find('Properties')
+                name=props.find("string[@name='Name']").text
+                if name not in ('CornerPier','WallBase','Back','Front','Side','EntryHeader'):
+                    continue
+                corners+=name=='CornerPier'
+                frame=props.find("CoordinateFrame[@name='CFrame']")
+                pos=[float(frame.find(k).text) for k in ('X','Y','Z')]
+                size=[float(v.text) for v in props.find("Vector3[@name='size']")]
+                shell.append([(v-s/2,v+s/2) for v,s in zip(pos,size)])
+            self.assertEqual(corners,4)
+            for i,a in enumerate(shell):
+                for b in shell[i+1:]:
+                    self.assertFalse(all(min(a[k][1],b[k][1])-max(a[k][0],b[k][0])>1e-6 for k in range(3)),
+                                     'Wall and structural corner overlap')
+
+    def test_fort_enclosure_volume_is_continuous(self):
+        fort=next(i for i in self.xml.findall(".//Item[@class='Model']") if i.find("Properties/string[@name='Name']").text=='IslandFortress')
+        path=next(i for i in fort.findall('Item') if i.find("Properties/string[@name='Name']").text=='PerimeterPath')
+        nodes=[tuple(float(i.find(f"Properties/Vector3[@name='Value']/{k}").text) for k in ('X','Z')) for i in path.findall('Item')]
+        self.assertEqual(nodes[0],(114,195))
+        self.assertEqual(nodes[-1],(-114,195))
+        self.assertGreater(max(z for x,z in nodes),190)
+        self.assertLess(min(z for x,z in nodes),-230)
+        self.assertLess(min(x for x,z in nodes),-230)
+        self.assertGreater(max(x for x,z in nodes),230)
+        volumes=[i for i in fort.findall('.//Item') if i.find("Properties/string[@name='Name']").text=='CurtainVolume']
+        prisms=[p for volume in volumes for p in volume.findall("Item[@class='WedgePart']")]
+        def contains(p,point):
+            props=p.find('Properties')
+            f=props.find("CoordinateFrame[@name='CFrame']")
+            off=[point[i]-float(f.find(k).text) for i,k in enumerate(('X','Y','Z'))]
+            local=[sum(float(f.find(f'R{j}{i}').text)*off[j] for j in range(3)) for i in range(3)]
+            size=[float(v.text) for v in props.find("Vector3[@name='size']")]
+            return all(abs(local[i])<=size[i]/2+1e-4 for i in range(3)) and local[1]+size[1]/2 <= (local[2]/size[2]+.5)*size[1]+1e-4
+        for a,b in zip(nodes,nodes[1:]):
+            dx,dz=b[0]-a[0],b[1]-a[1]
+            length=math.hypot(dx,dz)
+            for t in (.03,.2,.5,.8,.97):
+                for offset in (-4.4,0,4.4):
+                    point=(a[0]+dx*t-dz/length*offset,15,a[1]+dz*t+dx/length*offset)
+                    self.assertTrue(any(contains(p,point) for p in prisms),f'Fort wall gap at {point}')
+        bastions=[i for i in fort.findall('Item') if i.find("Properties/string[@name='Name']").text.startswith('Bastion_')]
+        self.assertEqual(len(bastions),6)
+
+    def test_fort_stair_treads_reach_wall_deck(self):
+        stairs=[i for i in self.xml.findall(".//Item[@class='Model']") if i.find("Properties/string[@name='Name']").text in ('WestStair','EastStair')]
+        self.assertEqual(len(stairs),2)
+        for stair in stairs:
+            steps=[]
+            for item in stair.findall('Item'):
+                props=item.find('Properties')
+                if props.find("string[@name='Name']").text!='RampartTread': continue
+                frame=props.find("CoordinateFrame[@name='CFrame']")
+                size=[float(v.text) for v in props.find("Vector3[@name='size']")]
+                self.assertGreaterEqual(size[2],5)
+                steps.append(float(frame.find('Y').text)+size[1]/2)
+            self.assertEqual(sorted(steps),list(range(9,23)))
+
+    def test_fort_wall_top_faces_do_not_overlap(self):
+        # Project the actual WedgePart top faces; a positive intersection would
+        # reintroduce competing textures on the chemin de ronde.
+        caps=[]
+        for volume in self.xml.findall(".//Item[@class='Model']"):
+            if volume.find("Properties/string[@name='Name']").text!='CurtainVolume': continue
+            for p in volume.findall("Item[@class='WedgePart']"):
+                props=p.find('Properties')
+                f=props.find("CoordinateFrame[@name='CFrame']")
+                pos=[float(f.find(k).text) for k in ('X','Y','Z')]
+                half=[float(v.text)/2 for v in props.find("Vector3[@name='size']")]
+                x=half[0]*(1 if float(f.find('R10').text)>0 else -1)
+                tri=[]
+                for local in ((x,-half[1],-half[2]),(x,-half[1],half[2]),(x,half[1],half[2])):
+                    world=[pos[i]+sum(float(f.find(f'R{i}{j}').text)*local[j] for j in range(3)) for i in range(3)]
+                    self.assertAlmostEqual(world[1],22,places=4)
+                    tri.append((world[0],world[2]))
+                def cross(a,b,c): return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
+                if cross(*tri)<0: tri.reverse()
+                caps.append(tri)
+        def clipped(subject,clip):
+            for a,b in zip(clip,clip[1:]+clip[:1]):
+                result=[]
+                if not subject: break
+                for prev,cur in zip(subject[-1:]+subject[:-1],subject):
+                    dp,dc=cross(a,b,prev),cross(a,b,cur)
+                    if (dp>=0)!=(dc>=0):
+                        t=dp/(dp-dc)
+                        result.append((prev[0]+(cur[0]-prev[0])*t,prev[1]+(cur[1]-prev[1])*t))
+                    if dc>=0: result.append(cur)
+                subject=result
+            return subject
+        self.assertGreater(len(caps),100)
+        for index,a in enumerate(caps):
+            for b in caps[index+1:]:
+                polygon=clipped(a[:],b)
+                area=abs(sum(p[0]*q[1]-q[0]*p[1] for p,q in zip(polygon,polygon[1:]+polygon[:1])))/2
+                self.assertLess(area,.01,'Overlapping wall-walk cap faces')
+
+    def test_wall_walk_has_avatar_clearance(self):
+        # True local-space containment, including the inclined prism faces.
+        # AABBs alone would falsely classify the walk as inside its mitered rails.
+        colliders=[]
+        for item in self.parts:
+            props=item.find('Properties')
+            if props.find("bool[@name='CanCollide']").text!='true': continue
+            f=props.find("CoordinateFrame[@name='CFrame']")
+            pos=[float(f.find(k).text) for k in ('X','Y','Z')]
+            size=[float(v.text) for v in props.find("Vector3[@name='size']")]
+            matrix=[[float(f.find(f'R{i}{j}').text) for j in range(3)] for i in range(3)]
+            ext=[sum(abs(matrix[i][j])*size[j]/2 for j in range(3)) for i in range(3)]
+            if pos[1]+ext[1]<=22.1 or pos[1]-ext[1]>=28.3: continue
+            shape=props.find("token[@name='shape']")
+            kind='wedge' if item.get('class')=='WedgePart' else shape.text if shape is not None else '1'
+            colliders.append((props.find("string[@name='Name']").text,pos,size,matrix,ext,kind))
+        path=next(i for i in self.xml.findall(".//Item[@class='Folder']") if i.find("Properties/string[@name='Name']").text=='PerimeterPath')
+        nodes=[tuple(float(i.find(f"Properties/Vector3[@name='Value']/{k}").text) for k in ('X','Z')) for i in path.findall('Item')]
+        nodes=[(106.5,194),*nodes,(-106.5,194)]
+        for a,b in zip(nodes,nodes[1:]):
+            for t in (.04,.5,.96):
+                x,z=a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t
+                for angle in range(0,360,45):
+                    px,pz=x+2*math.sin(math.radians(angle)),z+2*math.cos(math.radians(angle))
+                    for y in (22.2,24.5,28):
+                        for name,pos,size,matrix,ext,kind in colliders:
+                            delta=[px-pos[0],y-pos[1],pz-pos[2]]
+                            if any(abs(delta[i])>ext[i]+1e-5 for i in range(3)): continue
+                            local=[sum(matrix[j][i]*delta[j] for j in range(3)) for i in range(3)]
+                            inside=all(abs(local[i])<size[i]/2-1e-5 for i in range(3))
+                            if kind=='wedge':
+                                inside=inside and local[1]+size[1]/2 < (local[2]/size[2]+.5)*size[1]-1e-5
+                            elif kind=='2':
+                                inside=abs(local[0])<size[0]/2 and (local[1]/(size[1]/2))**2+(local[2]/(size[2]/2))**2<1-1e-5
+                            elif kind=='0':
+                                inside=sum((local[i]/(size[i]/2))**2 for i in range(3))<1-1e-5
+                            self.assertFalse(inside,f'{name} blocks wall walk at {(px,y,pz)}')
 
 
 if __name__ == '__main__':

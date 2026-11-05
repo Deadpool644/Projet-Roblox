@@ -20,7 +20,7 @@ subprocess.run([sys.executable, 'tools/build_map.py'], cwd=root, check=True)
 subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_*.py', '-v'], cwd=root, check=True)
 (root/'build').mkdir(exist_ok=True)
 (root/'studio').mkdir(exist_ok=True)
-filename = 'OP-Empire-Wars-Map-v0.3.rbxlx'
+filename = 'OP-Empire-Wars-Map-v0.4.rbxlx'
 subprocess.run([rojo, 'build', 'default.project.json', '-o', f'build/{filename}'], cwd=root, check=True)
 place = ET.parse(root/'build'/filename)
 model = place.getroot()  # A place XML stores services directly below <roblox>.

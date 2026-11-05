@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Optional geometry preview using NumPy/Pillow; NOT a Roblox Studio screenshot.
 
-Usage: python3 tools/render_harbor.py [overview|street|rear]
+Usage: python3 tools/render_harbor.py [overview|street|rear|facade]
 The map generator and Roblox build do not depend on these optional packages.
 """
 import math
@@ -77,8 +77,11 @@ add_mesh([(-3072,0,-3072),(-3072,0,3072),(3072,0,3072),(3072,0,-3072)],
 eye, target, scale = ((420,360,600), (0,8,30), 2.65) if MODE == "overview" else ((120,91,245),(0,18,-35),5.0)
 if MODE == "rear":
     eye, target, scale = (-380,260,-530), (0,15,-25), 2.8
+if MODE == "facade":
+    eye, target, scale = (-12,29,4), (-56,18,-45), 26
 eye, target = np.array(eye,dtype=float), np.array(target,dtype=float)
 forward = (target-eye)/np.linalg.norm(target-eye)
+near_depth = -np.linalg.norm(target-eye)+0.1
 right = np.cross(forward, [0,1,0]); right /= np.linalg.norm(right)
 up = np.cross(right,forward)
 light = np.array([-.45, .85, .35]); light /= np.linalg.norm(light)
@@ -89,6 +92,8 @@ depth = np.full((HEIGHT, WIDTH), np.inf)
 def raster(tri, tint, normal):
     rel = tri-target
     coords = np.column_stack((rel@right*scale+WIDTH/2, -rel@up*scale+HEIGHT/2, rel@forward))
+    if coords[:,2].max() < near_depth:
+        return
     x0 = max(0,int(math.floor(coords[:,0].min())))
     x1 = min(WIDTH-1,int(math.ceil(coords[:,0].max())))
     y0 = max(0,int(math.floor(coords[:,1].min())))
@@ -122,10 +127,10 @@ try:
 except OSError:
     titlefont=smallfont=ImageFont.load_default()
 draw.rectangle((0,0,WIDTH,78), fill=(17,29,36))
-draw.text((32,20), 'OP EMPIRE WARS  /  GRAND PORT  /  v0.3',fill=(236,224,194),font=titlefont)
+draw.text((32,20), 'OP EMPIRE WARS  /  GRAND PORT  /  v0.4',fill=(236,224,194),font=titlefont)
 draw.rectangle((0,HEIGHT-52,WIDTH,HEIGHT),fill=(17,29,36))
 draw.text((32,HEIGHT-36),'Verification de geometrie hors Studio - ne montre pas le ciel, le brouillard ni les textures du jeu.',fill=(180,194,199),font=smallfont)
 (ROOT/'build').mkdir(exist_ok=True)
-dest=ROOT/'build'/f'Grand-Port-v0.3-{MODE}.png'
+dest=ROOT/'build'/f'Grand-Port-v0.4-{MODE}.png'
 image.save(dest)
 print(f'Rendered {len(triangles)} triangles: {dest}')

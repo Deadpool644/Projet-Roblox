@@ -106,11 +106,20 @@ def label(parent, text, pos, width=180):
 def building(parent, name, x, z, roof=(95, 69, 61), w=38, d=30, h=23, y=8):
     model = obj(parent, "Model", name)
     part(model, "Floor", (x, y+0.5, z), (w, 1, d), "wood", "wood")
-    part(model, "Back", (x, y+h/2, z-d/2), (w, h, 2), "cream", "plaster")
+    # A single, non-overlapping shell. Corner masonry replaces the end of each
+    # wall; it is no longer a set of stone plates pushed through the facade.
+    def wall(title, xx, zz, width, depth):
+        part(model, "WallBase", (xx, y+2, zz), (width, 4, depth), (124, 127, 124), "plaster")
+        part(model, title, (xx, y+4+(h-4)/2, zz), (width, h-4, depth), "cream", "plaster")
+
+    wall("Back", x, z-d/2, w-4.4, 2)
     for sign in (-1, 1):
-        part(model, "Side", (x+sign*w/2, y+h/2, z), (2, h, d), "cream", "plaster")
-        # Wide entry, no invisible solid facade obstructing the shop.
-        part(model, "Front", (x+sign*(w/4+3), y+h/2, z+d/2), (w/2-6, h, 2), "cream", "plaster")
+        wall("Side", x+sign*w/2, z, 2, d-4.4)
+        span = w/2-8.2
+        wall("Front", x+sign*(6+span/2), z+d/2, span, 2)
+        for end in (-1, 1):
+            part(model, "CornerPier", (x+sign*(w/2-.6), y+h/2, z+end*(d/2-.6)),
+                 (3.2, h, 3.2), (124, 127, 124), "plaster")
         part(model, "Post", (x+sign*(w/2-2), y+h/2, z+d/2+5), (2, h, 2), "wood", "wood")
     part(model, "Counter", (x, y+3, z-4), (w-8, 6, 4), "wood", "wood")
     part(model, "EntryHeader", (x, y+h-2.5, z+d/2), (12, 5, 2), "cream", "plaster")
@@ -203,12 +212,12 @@ fortifications = obj(hub, "Model", "HarborFortifications")
 for side in (-1, 1):
     # A 40-stud opening keeps the main avenue to the pier clear.
     # The curtain starts at the outside of the gate tower, never through it.
-    part(fortifications, "SeaWall", (side*77.5, 15, 195), (73, 14, 10), "stone")
-    part(fortifications, "GateTower", (side*31, 23, 188), (20, 30, 24), "rock", "rock")
+    part(fortifications, "SeaWall", (side*77.5, 15, 195), (73, 14, 10), "stone", "plaster")
+    part(fortifications, "GateTower", (side*31, 23, 188), (20, 30, 24), "rock", "plaster")
     for i in range(6):
-        part(fortifications, "Merlon", (side*(48+i*12), 24, 195), (6, 4, 10), "stone")
+        part(fortifications, "Merlon", (side*(48+i*12), 25.5, 199), (6, 3, 2), "stone", "plaster")
     for dz in (-8, 8):
-        part(fortifications, "TowerCrown", (side*31, 40, 188+dz), (22, 4, 5), "stone")
+        part(fortifications, "TowerCrown", (side*31, 40, 188+dz), (22, 4, 5), "stone", "plaster")
     part(fortifications, "LanternPost", (side*15, 14, 208), (1, 12, 1), "metal", "metal")
     lantern = part(fortifications, "Lantern", (side*15, 21, 208), (3, 4, 3), (255, 201, 122), "neon")
     light = obj(lantern, "PointLight", "WarmLight")
@@ -284,6 +293,9 @@ for cfg in CONFIG["islands"]:
 from harbor_details import decorate_hub
 
 decorate_hub(hub, obj=obj, part=part, disc=disc, prop=prop, color=color, vec=vec)
+from fortress import build_fortress
+
+build_fortress(hub, obj=obj, part=part, disc=disc, prop=prop)
 
 (ROOT / "assets").mkdir(exist_ok=True)
 ET.indent(XML)

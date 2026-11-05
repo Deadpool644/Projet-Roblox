@@ -135,14 +135,10 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
         y = 8
         pitched_roof(model, x=x, z=z, width=w, depth=d, wall_top=y+h, accent=accent,
                      detailed=True, obj=obj, part=part, prop=prop)
-        # Foundations, half-timbering and corner quoins; the entry remains open.
+        # The masonry belongs to the structural shell. No stone overlays at corners.
         for side in (-1, 1):
-            p(model, "StonePlinth", (x+side*w/2, 10, z), (2.8, 4, d+1.2), stone, "stone")
-            p(model, "FrontPlinth", (x+side*(w/4+3), 10, z+d/2+.25), (w/2-6, 4, 2), stone, "stone")
-            for dz in (-d/2, d/2):
-                p(model, "CornerTimber", (x+side*(w/2-.6), y+h/2, z+dz), (1.1, h, 1.1), wood)
             for band in (16, 26):
-                p(model, "SideBelt", (x+side*(w/2+.3), band, z), (.8, .8, d), wood)
+                p(model, "SideBelt", (x+side*(w/2+1.3), band, z), (.4, .8, d-4.4), wood)
             for dz in (-d/4, d/4):
                 xx = x+side*(w/2+1.1)
                 p(model, "SideWindowRecess", (xx, 20, z+dz), (.4, 7.5, 6.5), iron, "metal")
@@ -152,8 +148,6 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
                     p(model, "SideWindowFrame", (xx+side*.5, 20, z+dz+zz), (.4, 7.2, .3), wood)
                 for yy in (-3.5, 0, 3.5):
                     p(model, "SideWindowFrame", (xx+side*.5, 20+yy, z+dz), (.4, .3, 6.5), wood)
-            for k in range(5):
-                p(model, "CornerQuoin", (x+side*(w/2+.35), 10+k*4, z+d/2+.3), (3, 1.6, 2.8), (135-k*3, 136-k*3, 130-k*3), "stone")
             p(model, "RainGutter", (x+side*(w/2+3.5), 30.6, z), (.7, .7, d+6), iron, "metal")
             beam(model, "Drainpipe", (x+side*(w/2+2), 9, z-d/2+2), (x+side*(w/2+2), 30, z-d/2+2), .6, iron, "metal")
             window(model, x+side*(w/4+3), 20, z+d/2+1.1, min(6, w/2-11), 7)
@@ -162,7 +156,6 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
             p(model, "DoorJamb", (x+side*6.6, 17, z+d/2+1.4), (1.2, 18, 1.8), stone, "stone")
         p(model, "DoorLintel", (x, 27, z+d/2+1.3), (14.4, 2, 2), stone, "stone")
         p(model, "EntryThreshold", (x, 8.8, z+d/2+2), (12, 1.2, 4), stone, "stone", solid=True)
-        p(model, "RearPlinth", (x, 10, z-d/2-.35), (w, 4, 2.7), stone, "stone")
         sign(model, title, x, 30, z+d/2+4, w-6, 3.8)
         lantern(model, x-9, 20, z+d/2+3, light=title in ("ARMES", "FRUITS", "QUARTIER MARINE"))
         p(model, "Chimney", (x-w/3, 37, z-d/4), (4, 13, 4), (95, 91, 85), "brick")

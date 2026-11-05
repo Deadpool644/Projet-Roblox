@@ -1,22 +1,22 @@
 # OP Empire Wars — première map
 
-Jeu Roblox de conquête maritime et de gestion d'îles. Version **0.3 : corrections des bâtiments et ambiance maritime**, avec les côtes de la première maquette conservées. Direction : ports fortifiés, pierre grise, bois vieilli, ardoise, lumière douce et mer brumeuse. L'image de référence guide la séparation des îles, leurs thèmes et leur lisibilité ; les formes restent originales.
+Jeu Roblox de conquête maritime et de gestion d'îles. Version **0.4 : enceinte complète et angles de façades reconstruits**, avec les côtes de la première maquette conservées. Direction : ports fortifiés, pierre grise, bois vieilli, ardoise, lumière douce et mer brumeuse. L'image de référence guide la séparation des îles, leurs thèmes et leur lisibilité ; les formes restent originales.
 
 ## Ouvrir dans Roblox Studio
 
 1. Depuis GitHub, cliquer sur **Code → Download ZIP**, puis extraire le ZIP. Si la branche `main` ne contient qu'un README, sélectionner d'abord la branche `map-v0.1` dans le sélecteur de branche.
-2. Dans le dossier extrait, repérer [`studio/OP-Empire-Wars-Map-v0.3.rbxlx`](studio/OP-Empire-Wars-Map-v0.3.rbxlx). C'est la dernière version prête à ouvrir. Le fichier seul peut aussi être téléchargé depuis sa page GitHub avec **Download raw file**. Les versions précédentes sont conservées pour comparaison.
+2. Dans le dossier extrait, repérer [`studio/OP-Empire-Wars-Map-v0.4.rbxlx`](studio/OP-Empire-Wars-Map-v0.4.rbxlx). C'est la dernière version prête à ouvrir. Le fichier seul peut aussi être téléchargé depuis sa page GitHub avec **Download raw file**. Les versions précédentes sont conservées pour comparaison.
 3. Dans Studio, **Fichier → Ouvrir depuis un fichier**, sélectionner ce fichier.
 4. La map est visible et modifiable dans `Workspace.Archipelago` avant de jouer.
 5. Cliquer sur **Jouer** pour apparaître au centre, créer l'eau native et activer la brume maritime progressive. En édition, le ciel couvert et l'atmosphère côtière sont présents ; le brouillard local en mer s'active uniquement en jeu.
 
-Le modèle seul est également disponible dans `assets/Archipelago.rbxmx`. **Ouvrir la place complète** pour avoir le ciel, les nuages, l'eau et le script client du brouillard. Aucun plugin requis pour ouvrir la place. Ouvrir la v0.3 dans un nouveau document Studio ; ne pas superposer son modèle à une ancienne copie de l'archipel. Conserver à part les éventuelles retouches personnelles avant de changer de version.
+Le modèle seul est également disponible dans `assets/Archipelago.rbxmx`. **Ouvrir la place complète** pour avoir le ciel, les nuages, l'eau et le script client du brouillard. Aucun plugin requis pour ouvrir la place. Ouvrir la v0.4 dans un nouveau document Studio ; ne pas superposer son modèle à une ancienne copie de l'archipel. Conserver à part les éventuelles retouches personnelles avant de changer de version.
 
 [Voir le plan de disposition](docs/Plan-archipel-v0.1.png).
 
-![Vue d'ensemble de la géométrie de Grand Port](docs/Grand-Port-v0.3-overview.png)
+![Vue d'ensemble de la géométrie du fort](docs/Grand-Port-v0.4-overview.png)
 
-[Vérification des façades et pignons arrière](docs/Grand-Port-v0.3-rear.png). Ces aperçus sont des rendus techniques de la géométrie générée, **pas des captures Roblox Studio** ; ils ne montrent pas ses textures, son ciel ou son brouillard.
+[Vérification d'un angle de façade](docs/Grand-Port-v0.4-facade.png). Ces aperçus sont des rendus techniques de la géométrie générée, **pas des captures Roblox Studio** ; ils ne montrent pas ses textures, son ciel ou son brouillard.
 
 Pour Rojo, conserver le dossier complet extrait : ouvrir un terminal dans celui contenant `default.project.json`, installer les outils avec `rokit install` si Rokit est disponible, puis lancer `rojo serve default.project.json`. Garder le terminal ouvert et connecter le plugin Studio à `localhost:34872`. Le plugin seul ne lance pas le serveur. Le fichier dans `studio/` est une livraison figée ; les prochains changements synchronisés utilisent les sources, pas ce fichier place.
 
@@ -35,7 +35,7 @@ Pour Rojo, conserver le dossier complet extrait : ouvrir un terminal dans celui 
 - Rues pavées et bordures, place à motif de boussole, fontaine décorative, bancs, lanternes et panneau maritime physique.
 - Quais habillés de planches, cordages, bollards, défenses de bois, tonneaux et cargaisons ; grues statiques et coque en construction au chantier.
 - Jardinières, arbres, herbes côtières et rochers. Les petites décorations ne bloquent pas les personnages ni les raycasts.
-- Atmosphère, correction colorimétrique et halo discret des lumières. Budget : moins de 4 000 pièces pour tout l'archipel, au plus 16 lumières ponctuelles ; performances réelles à mesurer sur mobile.
+- Atmosphère, correction colorimétrique et halo discret des lumières. Avec l'enceinte v0.4, budget de moins de 4 500 pièces pour tout l'archipel, au plus 16 lumières ponctuelles ; performances réelles à mesurer sur mobile.
 
 Cette passe porte sur **Grand Port**. Les 13 autres îles restent des maquettes thématiques ; leurs côtes et leurs parcelles n'ont pas été déplacées.
 
@@ -50,6 +50,16 @@ Cette passe porte sur **Grand Port**. Les 13 autres îles restent des maquettes 
 
 [Détails des corrections et validation](docs/Corrections-v0.3.md).
 
+### Fort et façades v0.4
+
+- Les plaques de pierre aux angles sont supprimées. Chaque bâtiment a maintenant quatre piliers et des murs/soubassements qui s'arrêtent à ces piliers : ils ne traversent plus les façades. Les pignons couvrent aussi l'épaisseur extérieure réelle des murs.
+- Une enceinte suit le pourtour de Grand Port et rejoint l'entrée du port. Elle comprend six bastions périphériques supplémentaires, des parapets, des créneaux et un chemin de ronde.
+- Deux escaliers intérieurs donnent accès au chemin de ronde. Les anciens créneaux du port sont replacés sur le bord extérieur pour ne plus barrer le passage.
+- Les tronçons de muraille sont découpés en prismes jointifs, avec contrôle de leurs faces supérieures : pas d'empilement de boîtes sur le chemin de ronde. La pierre utilise un grain plus sobre, sans briques directionnelles qui changeraient d'orientation d'un triangle à l'autre.
+- Les bases des îles, bâtiments, boutiques, spawn, quais et ambiance maritime sont conservés.
+
+[Détails de l'enceinte et des contrôles](docs/Fort-v0.4.md).
+
 Les commerces, panneaux et parcelles sont des **emplacements et décors**. Pas encore de bateaux pilotables, capture, économie, carte interactive, combats, protection PvP, races ou factions jouables. Les bonus d'île sont des données de conception sans effet actuel.
 
 ## Développement
@@ -62,7 +72,7 @@ Depuis la racine du dépôt :
 python3 tools/build_map.py
 python3 -m unittest discover -s tools -p 'test_*.py' -v
 mkdir -p build
-rojo build default.project.json -o build/OP-Empire-Wars-Map-v0.3.rbxlx
+rojo build default.project.json -o build/OP-Empire-Wars-Map-v0.4.rbxlx
 ```
 
 Si `rojo` n'est pas dans le PATH, utiliser son chemin cloud ci-dessus. Pour la synchronisation avec le plugin Rojo officiel de Studio : `rojo serve default.project.json`.
@@ -73,6 +83,7 @@ Pour régénérer, exécuter les contrôles, construire et actualiser la copie d
 - `tools/build_map.py` : générateur déterministe du modèle.
 - `tools/harbor_details.py` : composition et détails de Grand Port.
 - `tools/roofing.py` : profil de toiture et pignons communs à tous les bâtiments.
+- `tools/fortress.py` : enceinte, bastions et accès au chemin de ronde.
 - `assets/Archipelago.rbxmx` : modèle généré inclus par Rojo.
 - `src/server/Ocean.server.luau` : eau native au lancement.
 - `src/client/MaritimeWeather.client.luau` : transitions atmosphériques et brume locale.
@@ -84,7 +95,7 @@ Pour régénérer, exécuter les contrôles, construire et actualiser la copie d
 
 ## Validation
 
-Vérifié dans le cloud : douze contrôles de structure et disposition, dont fermetures des pignons et absence des recouvrements corrigés ; tests Luau de la géographie et du cycle de vie du brouillard ; compilation Luau et construction de la place avec Rojo. Les bases des îles restent identiques à la v0.1. **Roblox Studio n'est pas disponible ici : aucun test de jeu natif n'a été exécuté.**
+Vérifié dans le cloud : dix-sept contrôles de structure et disposition, dont assemblage des angles, pignons, continuité de l'enceinte, faces du chemin de ronde et dégagement pour un personnage ; construction de la place avec Rojo. Le script de météo de la v0.3 est conservé, avec ses tests Luau. Les bases des îles restent identiques à la v0.1. **Roblox Studio n'est pas disponible ici : aucun test de jeu natif n'a été exécuté.**
 
 Avec le CLI Luau officiel (testé en 0.699), exécuter aussi :
 
