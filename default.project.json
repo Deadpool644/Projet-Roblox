@@ -1,0 +1,23 @@
+{
+  "name": "OP Empire Wars",
+  "tree": {
+    "$className": "DataModel",
+    "Workspace": {
+      "$properties": { "StreamingEnabled": true, "StreamingMinRadius": 128, "StreamingTargetRadius": 512 },
+      "Archipelago": { "$path": "assets/Archipelago.rbxmx" }
+    },
+    "ServerScriptService": { "World": { "$path": "src/server" } },
+    "Lighting": {
+      "$properties": {
+        "ClockTime": 17.2,
+        "Brightness": 2,
+        "Ambient": [0.25, 0.28, 0.32],
+        "OutdoorAmbient": [0.4, 0.43, 0.47],
+        "GlobalShadows": true,
+        "FogColor": [0.48, 0.55, 0.6],
+        "FogStart": 1800,
+        "FogEnd": 6500
+      }
+    }
+  }
+}

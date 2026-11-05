@@ -1,0 +1,18 @@
+{
+  "hub": {"id":"grand_port","name":"Grand Port","x":0,"z":0,"radius":230},
+  "islands": [
+    {"id":"moissons","name":"Île des Moissons","tier":1,"x":0,"z":850,"radius":130,"theme":"farm","bonus":"+15 % nourriture"},
+    {"id":"pins","name":"Île des Pins","tier":1,"x":-850,"z":0,"radius":130,"theme":"forest","bonus":"+15 % bois"},
+    {"id":"echanges","name":"Île des Échanges","tier":1,"x":850,"z":0,"radius":130,"theme":"trade","bonus":"+12 % commerce"},
+    {"id":"roches","name":"Île des Roches","tier":1,"x":0,"z":-850,"radius":130,"theme":"quarry","bonus":"+15 % pierre"},
+    {"id":"forges","name":"Île des Forges","tier":2,"x":-1080,"z":1320,"radius":160,"theme":"forge","bonus":"+15 % fer et métal"},
+    {"id":"vents","name":"Île des Vents","tier":2,"x":1080,"z":1320,"radius":160,"theme":"wind","bonus":"+10 % navigation locale"},
+    {"id":"corallienne","name":"Île Corallienne","tier":2,"x":1640,"z":-480,"radius":160,"theme":"coral","bonus":"+20 % pêche"},
+    {"id":"remparts","name":"Île des Remparts","tier":2,"x":0,"z":-1700,"radius":160,"theme":"fort","bonus":"+12 % tours"},
+    {"id":"brumes","name":"Île des Brumes","tier":2,"x":-1640,"z":-480,"radius":160,"theme":"swamp","bonus":"+10 % reconnaissance furtive"},
+    {"id":"volcan","name":"Île du Volcan","tier":3,"x":-1900,"z":1900,"radius":190,"theme":"volcano","bonus":"+15 % forge d’armes"},
+    {"id":"tempetes","name":"Île des Tempêtes","tier":3,"x":1900,"z":1900,"radius":190,"theme":"storm","bonus":"+12 % défenses côtières"},
+    {"id":"anciens","name":"Île des Anciens","tier":3,"x":-1900,"z":-1900,"radius":190,"theme":"ancient","bonus":"+12 % recherche"},
+    {"id":"trone","name":"Île du Trône","tier":3,"x":1900,"z":-1900,"radius":190,"theme":"citadel","bonus":"+10 % moral"}
+  ]
+}
