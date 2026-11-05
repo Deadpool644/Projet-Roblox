@@ -1,5 +1,11 @@
 # Notes du projet
 
+## Direction active après la v0.5
+
+Le nouveau [brief premium](Direction-artistique-premium.md) remplace les compromis artistiques précédents : pas de feuillage en sphères, vrais meshes d'arbres avec textures, relief natif et validation en Studio par phases A–G. L'[audit de phase A](Audit-premium-A.md) est effectué ; les 21 contrôles géométriques passent mais ne valident pas la qualité visuelle. Le module de phase B est préparé pour un aperçu d'éditeur, compilé, non appliqué et non validé visuellement. Le Sky manque et la météo en jeu devra être alignée sur le nouveau profil avant validation.
+
+Les meshes et textures nécessaires ne sont pas disponibles. Respecter l'arrêt demandé au lieu de fabriquer une nouvelle végétation en primitives. Le premier prérequis est l'import du lot décrit dans [Assets-premium.md](Assets-premium.md), transmis comme modèle `.rbxm`/`.rbxmx`. Ne pas réexécuter le générateur v0.5 pour prétendre satisfaire ce brief. Les sources, la map existante, le spawn et les collisions sont conservés pendant cette préparation. La migration du sol et les étapes suivantes ne sont pas réalisées.
+
 ## Demande et direction
 
 L'assistant réalise le projet et le porteur du projet le guide. Commencer par la map. Préférence explicitement choisie : **plus sombre, ports fortifiés et réalistes**. L'image ensuite fournie sert de référence pour un archipel lisible, avec de grandes étendues de mer, des îles distinctes et des silhouettes à thèmes. Pas de reproduction des lieux, noms ou formes exactes de l'image.

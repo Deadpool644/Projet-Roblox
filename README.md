@@ -1,5 +1,9 @@
 # OP Empire Wars — première map
 
+> **Nouvelle direction active :** [brief premium](docs/Direction-artistique-premium.md), [audit phase A](docs/Audit-premium-A.md) et [assets à importer](docs/Assets-premium.md). La v0.5 ci-dessous est une archive de prototype : son feuillage en primitives ne respecte pas le nouveau brief. Aucune nouvelle map de qualité « premium » n'est annoncée avant remplacement des assets et validation native dans Studio.
+
+La phase A est effectuée. Un [module d'aperçu d'éclairage pour l'éditeur](tools/studio/PhaseBLightingPreview.luau) est préparé et compilé, sans être appliqué à la map : importer comme **ModuleScript** dans `ServerStorage/ArtTools/PhaseBLightingPreview`, puis appeler `require(game.ServerStorage.ArtTools.PhaseBLightingPreview).apply()` dans la barre de commandes, hors mode Jouer. `.restore()` restaure les valeurs capturées dans cette session. Le module ne modifie ni terrain, ni spawns, ni collisions, ni ciel. Le Sky externe manque et le profil du contrôleur `MaritimeWeather` doit encore être unifié ; **la phase B n'est donc pas validée en jeu**. Les phases C–G restent à réaliser selon l'ordre demandé.
+
 Jeu Roblox de conquête maritime et de gestion d'îles. Version **0.5 : porte monumentale et jardins fleuris**, avec les côtes de la première maquette conservées. Direction : fort maritime bleu-gris, chaînes et braseros, arbres fleuris, cascade turquoise et lanternes dorées. Les références guident la composition et le contraste ; les formes, emblèmes et décors sont originaux.
 
 ## Ouvrir dans Roblox Studio
