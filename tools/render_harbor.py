@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Optional geometry preview using NumPy/Pillow; NOT a Roblox Studio screenshot.
 
-Usage: python3 tools/render_harbor.py [overview|street|rear|facade]
+Usage: python3 tools/render_harbor.py [overview|street|rear|facade|arrival|garden]
 The map generator and Roblox build do not depend on these optional packages.
 """
 import math
@@ -72,13 +72,17 @@ for item in hub.findall(".//Item"):
 
 # Match the native ocean's surface at Y=0 so submerged foundations are hidden.
 add_mesh([(-3072,0,-3072),(-3072,0,3072),(3072,0,3072),(3072,0,-3072)],
-         [(0,1,2,3)], np.eye(3), np.zeros(3), (63/255,103/255,117/255))
+         [(0,1,2,3)], np.eye(3), np.zeros(3), (35/255,84/255,143/255))
 
 eye, target, scale = ((420,360,600), (0,8,30), 2.65) if MODE == "overview" else ((120,91,245),(0,18,-35),5.0)
 if MODE == "rear":
     eye, target, scale = (-380,260,-530), (0,15,-25), 2.8
 if MODE == "facade":
     eye, target, scale = (-12,29,4), (-56,18,-45), 26
+if MODE == "arrival":
+    eye, target, scale = (150,105,470), (0,35,170), 5
+if MODE == "garden":
+    eye, target, scale = (78,98,35), (-30,39,-161), 8
 eye, target = np.array(eye,dtype=float), np.array(target,dtype=float)
 forward = (target-eye)/np.linalg.norm(target-eye)
 near_depth = -np.linalg.norm(target-eye)+0.1
@@ -127,10 +131,10 @@ try:
 except OSError:
     titlefont=smallfont=ImageFont.load_default()
 draw.rectangle((0,0,WIDTH,78), fill=(17,29,36))
-draw.text((32,20), 'OP EMPIRE WARS  /  GRAND PORT  /  v0.4',fill=(236,224,194),font=titlefont)
+draw.text((32,20), 'OP EMPIRE WARS  /  GRAND PORT  /  v0.5',fill=(236,224,194),font=titlefont)
 draw.rectangle((0,HEIGHT-52,WIDTH,HEIGHT),fill=(17,29,36))
 draw.text((32,HEIGHT-36),'Verification de geometrie hors Studio - ne montre pas le ciel, le brouillard ni les textures du jeu.',fill=(180,194,199),font=smallfont)
 (ROOT/'build').mkdir(exist_ok=True)
-dest=ROOT/'build'/f'Grand-Port-v0.4-{MODE}.png'
+dest=ROOT/'build'/f'Grand-Port-v0.5-{MODE}.png'
 image.save(dest)
 print(f'Rendered {len(triangles)} triangles: {dest}')

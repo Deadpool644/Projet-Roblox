@@ -33,7 +33,9 @@ Validation cloud actuelle : neuf tests structurels/disposition, régénération 
 
 La v0.3 corrige ensuite les pignons et recouvrements signalés par captures, ajoute les façades arrière et remplace l'ambiance sombre par un ciel couvert plus lisible et une brume maritime locale progressive. Voir `Corrections-v0.3.md`.
 
-La v0.4 reconstruit les angles des 11 bâtiments après une nouvelle capture et ajoute l'enceinte complète, six bastions périphériques et deux accès au chemin de ronde. Voir `Fort-v0.4.md`. Utiliser maintenant le fichier v0.4 dans `studio/` ; les versions antérieures sont des archives. Les bases des îles et l'ambiance maritime sont conservées.
+La v0.4 reconstruit les angles des 11 bâtiments après une nouvelle capture et ajoute l'enceinte complète, six bastions périphériques et deux accès au chemin de ronde. Voir `Fort-v0.4.md`.
+
+La v0.5 répond aux nouvelles références de qualité par une porte monumentale avec arche, chaînes et braseros, des arbres fleuris sculptés, des fleurs, une cascade et des effets locaux légers. Voir `Art-v0.5.md`. Utiliser maintenant le fichier v0.5 dans `studio/` ; les versions antérieures sont des archives. Les bases des îles sont conservées ; la qualité finale reste à juger dans le moteur Roblox.
 
 Ouvrir la version détaillée dans Studio, contrôler le rendu, les accès et les performances, puis créer un premier bateau pilotable pour éprouver les distances avant de finaliser les autres îles.
 

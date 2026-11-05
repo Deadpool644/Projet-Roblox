@@ -20,7 +20,7 @@ subprocess.run([sys.executable, 'tools/build_map.py'], cwd=root, check=True)
 subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_*.py', '-v'], cwd=root, check=True)
 (root/'build').mkdir(exist_ok=True)
 (root/'studio').mkdir(exist_ok=True)
-filename = 'OP-Empire-Wars-Map-v0.4.rbxlx'
+filename = 'OP-Empire-Wars-Map-v0.5.rbxlx'
 subprocess.run([rojo, 'build', 'default.project.json', '-o', f'build/{filename}'], cwd=root, check=True)
 place = ET.parse(root/'build'/filename)
 model = place.getroot()  # A place XML stores services directly below <roblox>.
@@ -36,6 +36,7 @@ def instance_at(path):
 
 
 assert instance_at(['StarterPlayer','StarterPlayerScripts','MaritimeWeather']).get('class') == 'LocalScript'
+assert instance_at(['StarterPlayer','StarterPlayerScripts','GardenAmbience']).get('class') == 'LocalScript'
 assert instance_at(['ReplicatedStorage','WorldEnvironment']).get('class') == 'ModuleScript'
 assert instance_at(['Workspace','Terrain','MaritimeClouds']).get('class') == 'Clouds'
 lighting = instance_at(['Lighting'])

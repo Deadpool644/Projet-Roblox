@@ -70,7 +70,8 @@ class MapTests(unittest.TestCase):
         self.assertEqual(names.count('FutureBuildPlots'), 13)
         self.assertEqual(sum(n.startswith('Plot_') for n in names), 52)
         # Includes the coast-following enclosure, six bastions and both stairs.
-        self.assertLess(len(self.parts), 4500)
+        # Coastal fort, monumental entrance and original sculpted gardens.
+        self.assertLess(len(self.parts), 6000)
 
     def test_original_island_bases_preserved(self):
         geometry = []

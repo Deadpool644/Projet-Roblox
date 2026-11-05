@@ -158,7 +158,7 @@ def dock(parent, x, z, r):
 
 
 WORLD = obj(XML, "Model", "Archipelago")
-sea = part(WORLD, "OceanPreview", (0, -0.6, 0), (6144, 1, 6144), (63, 103, 117), "plastic", collide=False)
+sea = part(WORLD, "OceanPreview", (0, -0.6, 0), (6144, 1, 6144), (35, 84, 143), "plastic", collide=False)
 prop(sea, "float", "Transparency", 0.12)
 
 
@@ -296,6 +296,9 @@ decorate_hub(hub, obj=obj, part=part, disc=disc, prop=prop, color=color, vec=vec
 from fortress import build_fortress
 
 build_fortress(hub, obj=obj, part=part, disc=disc, prop=prop)
+from art_direction import art_pass
+
+art_pass(hub, obj=obj, part=part, disc=disc, prop=prop, color=color)
 
 (ROOT / "assets").mkdir(exist_ok=True)
 ET.indent(XML)

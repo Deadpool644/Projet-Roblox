@@ -4,11 +4,11 @@ local Workspace = game:GetService("Workspace")
 local map = Workspace:WaitForChild("Archipelago")
 local preview = map:FindFirstChild("OceanPreview")
 
-Workspace.Terrain.WaterColor = Color3.fromRGB(63, 103, 117)
+Workspace.Terrain.WaterColor = Color3.fromRGB(35, 84, 143)
 Workspace.Terrain.WaterTransparency = 0.28
-Workspace.Terrain.WaterReflectance = 0.12
-Workspace.Terrain.WaterWaveSize = 0.22
-Workspace.Terrain.WaterWaveSpeed = 9
+Workspace.Terrain.WaterReflectance = 0.22
+Workspace.Terrain.WaterWaveSize = 0.3
+Workspace.Terrain.WaterWaveSpeed = 10
 -- Chunking avoids a single large blocking terrain operation at startup.
 for x = -2688, 2688, 768 do
 	for z = -2688, 2688, 768 do

@@ -9,23 +9,24 @@
         "$ignoreUnknownInstances": true,
         "MaritimeClouds": {
           "$className": "Clouds",
-          "$properties": { "Cover": 0.76, "Density": 0.52, "Color": [0.76, 0.8, 0.84] }
+          "$properties": { "Cover": 0.55, "Density": 0.42, "Color": [0.76, 0.75, 0.82] }
         }
       },
       "Archipelago": { "$path": "assets/Archipelago.rbxmx" }
     },
     "ReplicatedStorage": { "WorldEnvironment": { "$path": "src/shared/WorldEnvironment.luau" } },
-    "StarterPlayer": { "StarterPlayerScripts": { "MaritimeWeather": { "$path": "src/client/MaritimeWeather.client.luau" } } },
+    "StarterPlayer": { "StarterPlayerScripts": { "MaritimeWeather": { "$path": "src/client/MaritimeWeather.client.luau" }, "GardenAmbience": { "$path": "src/client/GardenAmbience.client.luau" } } },
     "ServerScriptService": { "World": { "$path": "src/server" } },
     "Lighting": {
       "$properties": {
-        "ClockTime": 15.4,
-        "Brightness": 2.3,
+        "ClockTime": 16.2,
+        "Brightness": 2.4,
+        "Technology": "Future",
         "ExposureCompensation": 0.12,
         "EnvironmentDiffuseScale": 0.65,
         "EnvironmentSpecularScale": 0.45,
-        "Ambient": [0.27, 0.3, 0.33],
-        "OutdoorAmbient": [0.53, 0.57, 0.6],
+        "Ambient": [0.32, 0.34, 0.44],
+        "OutdoorAmbient": [0.58, 0.58, 0.65],
         "GlobalShadows": true,
         "ShadowSoftness": 0.3
       },
@@ -47,11 +48,11 @@
       },
       "HarborGrade": {
         "$className": "ColorCorrectionEffect",
-        "$properties": { "Brightness": 0.015, "Contrast": 0.04, "Saturation": -0.05, "TintColor": [0.97, 0.99, 1] }
+        "$properties": { "Brightness": 0.015, "Contrast": 0.06, "Saturation": 0.02, "TintColor": [1, 0.96, 0.97] }
       },
       "LanternBloom": {
         "$className": "BloomEffect",
-        "$properties": { "Intensity": 0.12, "Size": 16, "Threshold": 1.5 }
+        "$properties": { "Intensity": 0.18, "Size": 20, "Threshold": 1.25 }
       }
     }
   }
