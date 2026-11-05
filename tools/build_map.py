@@ -12,7 +12,8 @@ RNG = random.Random(644)
 XML = ET.Element("roblox", version="4")
 COUNT = 0
 MATERIAL = {"grass": 1280, "sand": 1296, "rock": 896, "wood": 528,
-            "stone": 880, "plastic": 272, "neon": 288, "metal": 1088}
+            "stone": 880, "plastic": 272, "neon": 288, "metal": 1088,
+            "slate": 800, "glass": 1568, "brick": 848, "fabric": 1312, "ground": 1360}
 PALETTE = {"grass": (79, 99, 75), "sand": (157, 151, 130),
            "rock": (77, 85, 94), "wood": (88, 71, 58),
            "stone": (112, 118, 121), "cream": (169, 166, 153), "metal": (62, 69, 77)}
@@ -275,6 +276,10 @@ for cfg in CONFIG["islands"]:
     if theme in ("storm", "quarry"):
         for i in range(3):
             part(scenery, "HighRidge", (x-60+i*45, 22+i*8, z-70), (38, 28+i*16, 35), "rock", "rock", (0, i*25, 0))
+
+from harbor_details import decorate_hub
+
+decorate_hub(hub, obj=obj, part=part, disc=disc, prop=prop, color=color, vec=vec)
 
 (ROOT / "assets").mkdir(exist_ok=True)
 ET.indent(XML)

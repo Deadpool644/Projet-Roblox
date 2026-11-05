@@ -23,8 +23,14 @@ Point à retenir : les premières sections évoquent une possession persistante 
 - Zone sûre prévue au hub ; aucune arme ou système de dégâts. La protection devra être validée côté serveur lors de l'ajout des combats.
 - L'océan remplit une zone prédéfinie de terrain au lancement. Ne pas y ajouter de terrain sculpté sans adapter le script ; les îles actuelles utilisent des Parts.
 
+## Grand Port v0.2
+
+La base de l'île a été validée par le porteur du projet. La passe suivante détaille Grand Port sans changer les bases des îles : façades et intérieurs, commerces, remparts, tour Marine, quais équipés, chantier naval, espaces publics et végétation. Voir `Grand-Port-v0.2.md` pour les détails et limites.
+
+Validation cloud actuelle : neuf tests structurels/disposition, régénération déterministe et build de la place complète. La v0.1 est conservée à titre de comparaison ; utiliser le fichier v0.2 dans `studio/` pour la dernière livraison.
+
 ## Prochaine étape
 
-Ouvrir la maquette dans Studio et valider avec le porteur les proportions, l'orientation visuelle et Grand Port. Détailler ensuite les côtes et fortifications, puis créer un premier bateau pilotable pour éprouver les distances avant de finaliser l'archipel.
+Ouvrir la version détaillée dans Studio, contrôler le rendu, les accès et les performances, puis créer un premier bateau pilotable pour éprouver les distances avant de finaliser les autres îles.
 
-Validation cloud : génération, six tests structurels/disposition et build Rojo. Restent à faire dans Studio : rendu, collisions en mouvement, nage, streaming et performances mobile. Aucun de ces tests de jeu n'est déclaré passé.
+Restent à faire dans Studio : rendu, collisions en mouvement, nage, streaming et performances mobile. Aucun de ces tests de jeu n'est déclaré passé.

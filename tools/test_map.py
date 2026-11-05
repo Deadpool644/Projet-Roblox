@@ -2,6 +2,7 @@
 import collections
 import json
 import math
+import hashlib
 from pathlib import Path
 import unittest
 import xml.etree.ElementTree as ET
@@ -14,7 +15,7 @@ class MapTests(unittest.TestCase):
     def setUpClass(cls):
         cls.cfg = json.loads((ROOT / 'tools/world.json').read_text())
         cls.xml = ET.parse(ROOT / 'assets/Archipelago.rbxmx')
-        cls.parts = [p for p in cls.xml.findall('.//Item') if p.get('class') in ('Part', 'SpawnLocation')]
+        cls.parts = [p for p in cls.xml.findall('.//Item') if p.get('class') in ('Part', 'SpawnLocation', 'WedgePart')]
 
     def test_catalogue_and_rings(self):
         islands = self.cfg['islands']
@@ -68,7 +69,52 @@ class MapTests(unittest.TestCase):
         names = [v.text for v in self.xml.findall(".//Properties/string[@name='Name']")]
         self.assertEqual(names.count('FutureBuildPlots'), 13)
         self.assertEqual(sum(n.startswith('Plot_') for n in names), 52)
-        self.assertLess(len(self.parts), 1500)
+        self.assertLess(len(self.parts), 4000)
+
+    def test_original_island_bases_preserved(self):
+        geometry = []
+        for item in self.parts:
+            props = item.find('Properties')
+            name = props.find("string[@name='Name']").text
+            if name in ('Foundation', 'Beach', 'Plateau', 'Coast'):
+                geometry.append([name, [float(n.text) for n in props.find("CoordinateFrame[@name='CFrame']")],
+                                 [float(n.text) for n in props.find("Vector3[@name='size']")]])
+        digest = hashlib.sha256(json.dumps(geometry, sort_keys=True).encode()).hexdigest()
+        baseline = json.loads((ROOT/'tools/coastline-baseline.json').read_text())
+        self.assertEqual(digest, baseline['sha256'])
+
+    def test_light_budget_and_details(self):
+        self.assertLessEqual(len(self.xml.findall(".//Item[@class='PointLight']")), 16)
+        names = {v.text for v in self.xml.findall(".//Properties/string[@name='Name']")}
+        self.assertTrue({'MarineSignalTower', 'HullStrake', 'SwordBlade', 'Breastplate', 'DisplayFruit',
+                         'NavigationPanel', 'PierPlank', 'SlateCourse', 'FountainFoot', 'WindowMullion'} <= names)
+
+    def test_principal_routes_have_character_clearance(self):
+        # A 4-stud-wide, 6-stud-high avatar envelope along hub footpaths.
+        # This checks static obstacles, not actual Studio character physics.
+        samples = [(0, z) for z in range(0, 292, 2)]
+        for x in (-75, 0, 75):
+            samples += [(x, z) for z in range(-42, -25, 2)]
+        for side in (-1, 1):
+            samples += [(side*x, 98) for x in range(0, 131, 2)]
+            samples += [(side*130, z) for z in range(75, 99, 2)]
+        obstacles = []
+        for item in self.parts:
+            props = item.find('Properties')
+            if props.find("bool[@name='CanCollide']").text != 'true':
+                continue
+            frame = props.find("CoordinateFrame[@name='CFrame']")
+            center = [float(frame.find(k).text) for k in ('X','Y','Z')]
+            dims = [float(n.text) for n in props.find("Vector3[@name='size']")]
+            extents = [sum(abs(float(frame.find(f'R{i}{j}').text))*dims[j]/2 for j in range(3)) for i in range(3)]
+            # Floor and threshold surfaces can be up to 9.5 studs high.
+            if center[1]+extents[1] <= 9.5 or center[1]-extents[1] >= 15.5:
+                continue
+            obstacles.append((props.find("string[@name='Name']").text, center, extents))
+        for x, z in samples:
+            for name, center, extents in obstacles:
+                self.assertFalse(abs(x-center[0]) < extents[0]+2 and abs(z-center[2]) < extents[2]+2,
+                                 f'{name} blocks route at {(x,z)}')
 
 
 if __name__ == '__main__':
