@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Optional geometry preview using NumPy/Pillow; NOT a Roblox Studio screenshot.
 
-Usage: python3 tools/render_harbor.py [overview|street]
+Usage: python3 tools/render_harbor.py [overview|street|rear]
 The map generator and Roblox build do not depend on these optional packages.
 """
 import math
@@ -72,9 +72,11 @@ for item in hub.findall(".//Item"):
 
 # Match the native ocean's surface at Y=0 so submerged foundations are hidden.
 add_mesh([(-3072,0,-3072),(-3072,0,3072),(3072,0,3072),(3072,0,-3072)],
-         [(0,1,2,3)], np.eye(3), np.zeros(3), (39/255,78/255,91/255))
+         [(0,1,2,3)], np.eye(3), np.zeros(3), (63/255,103/255,117/255))
 
 eye, target, scale = ((420,360,600), (0,8,30), 2.65) if MODE == "overview" else ((120,91,245),(0,18,-35),5.0)
+if MODE == "rear":
+    eye, target, scale = (-380,260,-530), (0,15,-25), 2.8
 eye, target = np.array(eye,dtype=float), np.array(target,dtype=float)
 forward = (target-eye)/np.linalg.norm(target-eye)
 right = np.cross(forward, [0,1,0]); right /= np.linalg.norm(right)
@@ -105,7 +107,7 @@ def raster(tri, tint, normal):
     if not mask.any(): return
     # Two-sided diffuse preview; actual Studio lighting/materials differ.
     diffuse=abs(normal@light)
-    shaded=np.clip(tint*(.50+.50*diffuse)*255,0,255)
+    shaded=np.clip(tint*(.60+.40*diffuse)*255,0,255)
     buffer[y0:y1+1,x0:x1+1][mask]=shaded
     region[mask]=z[mask]
 
@@ -120,10 +122,10 @@ try:
 except OSError:
     titlefont=smallfont=ImageFont.load_default()
 draw.rectangle((0,0,WIDTH,78), fill=(17,29,36))
-draw.text((32,20), 'OP EMPIRE WARS  /  GRAND PORT  /  v0.2',fill=(236,224,194),font=titlefont)
+draw.text((32,20), 'OP EMPIRE WARS  /  GRAND PORT  /  v0.3',fill=(236,224,194),font=titlefont)
 draw.rectangle((0,HEIGHT-52,WIDTH,HEIGHT),fill=(17,29,36))
-draw.text((32,HEIGHT-36),'Apercu des volumes generes - rendu technique hors Roblox Studio, sans ses textures ni ses effets.',fill=(180,194,199),font=smallfont)
+draw.text((32,HEIGHT-36),'Verification de geometrie hors Studio - ne montre pas le ciel, le brouillard ni les textures du jeu.',fill=(180,194,199),font=smallfont)
 (ROOT/'build').mkdir(exist_ok=True)
-dest=ROOT/'build'/f'Grand-Port-v0.2-{MODE}.png'
+dest=ROOT/'build'/f'Grand-Port-v0.3-{MODE}.png'
 image.save(dest)
 print(f'Rendered {len(triangles)} triangles: {dest}')

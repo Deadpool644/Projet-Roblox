@@ -116,6 +116,68 @@ class MapTests(unittest.TestCase):
                 self.assertFalse(abs(x-center[0]) < extents[0]+2 and abs(z-center[2]) < extents[2]+2,
                                  f'{name} blocks route at {(x,z)}')
 
+    def test_gables_close_both_ends_of_every_roof(self):
+        roofs = [i for i in self.xml.findall(".//Item[@class='Model']")
+                 if i.find("Properties/string[@name='Name']").text == 'RoofAssembly']
+        self.assertEqual(len(roofs), 11)
+        for roof in roofs:
+            dims = {i.find("Properties/string[@name='Name']").text: float(i.find("Properties/double[@name='Value']").text)
+                    for i in roof.findall("Item[@class='NumberValue']")}
+            for end in ('Front', 'Rear'):
+                gable = next(i for i in roof.findall('Item') if i.find("Properties/string[@name='Name']").text == end+'Gable')
+                pieces = [i for i in gable.findall('Item') if i.get('class') in ('Part','WedgePart')]
+                for fraction in (-.49, -.3, -.1, 0, .1, .3, .49):
+                    dx = dims['Width']*fraction
+                    top = dims['RidgeHeight']-abs(dx)*math.tan(math.radians(26))
+                    for vertical in (.05,.3,.65,.95):
+                        point = [dims['CenterX']+dx, dims['WallTop']+(top-dims['WallTop'])*vertical,
+                                 dims['CenterZ']+(1 if end=='Front' else -1)*dims['Depth']/2]
+                        covered = False
+                        for piece in pieces:
+                            props=piece.find('Properties')
+                            frame=props.find("CoordinateFrame[@name='CFrame']")
+                            offset=[point[i]-float(frame.find(k).text) for i,k in enumerate(('X','Y','Z'))]
+                            local=[sum(float(frame.find(f'R{j}{i}').text)*offset[j] for j in range(3)) for i in range(3)]
+                            size=[float(v.text) for v in props.find("Vector3[@name='size']")]
+                            inside=all(abs(local[i])<=size[i]/2+1e-5 for i in range(3))
+                            if piece.get('class')=='WedgePart':
+                                inside=inside and local[1]+size[1]/2 <= (local[2]/size[2]+.5)*size[1]+1e-5
+                            covered=covered or inside
+                        self.assertTrue(covered, f'{end} gable hole at {point}')
+
+    def test_gate_curtains_and_crenels_do_not_intersect_towers(self):
+        def bounds(p):
+            props=p.find('Properties')
+            f=props.find("CoordinateFrame[@name='CFrame']")
+            pos=[float(f.find(k).text) for k in ('X','Y','Z')]
+            size=[float(v.text) for v in props.find("Vector3[@name='size']")]
+            return [(v-s/2,v+s/2) for v,s in zip(pos,size)]
+        masonry=[p for p in self.parts if p.find("Properties/string[@name='Name']").text in ('SeaWall','GateTower','Merlon')]
+        for index,a in enumerate(masonry):
+            for b in masonry[index+1:]:
+                ba,bb=bounds(a),bounds(b)
+                overlap=[min(ba[k][1],bb[k][1])-max(ba[k][0],bb[k][0]) for k in range(3)]
+                self.assertFalse(all(v>1e-6 for v in overlap),'Intersecting gate masonry')
+        curtains=[p for p in masonry if p.find("Properties/string[@name='Name']").text=='SeaWall']
+        for p in self.parts:
+            if p.find("Properties/string[@name='Name']").text=='SeaWallAshlar':
+                self.assertGreater(bounds(p)[2][0],max(bounds(c)[2][1] for c in curtains))
+
+    def test_paving_junctions_have_no_coplanar_overlaps(self):
+        rects=[]
+        for p in self.parts:
+            props=p.find('Properties')
+            if props.find("string[@name='Name']").text!='UnifiedWalkway':
+                continue
+            frame=props.find("CoordinateFrame[@name='CFrame']")
+            x,z=float(frame.find('X').text),float(frame.find('Z').text)
+            size=[float(v.text) for v in props.find("Vector3[@name='size']")]
+            rects.append((x-size[0]/2,z-size[2]/2,x+size[0]/2,z+size[2]/2))
+        self.assertGreater(len(rects),10)
+        for i,a in enumerate(rects):
+            for b in rects[i+1:]:
+                self.assertFalse(min(a[2],b[2])-max(a[0],b[0])>1e-6 and min(a[3],b[3])-max(a[1],b[1])>1e-6)
+
 
 if __name__ == '__main__':
     unittest.main()

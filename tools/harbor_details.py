@@ -2,6 +2,8 @@
 import math
 import random
 import xml.etree.ElementTree as ET
+from roofing import pitched_roof
+from layout import rectangle_union
 
 
 def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
@@ -88,19 +90,19 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
         length = size*1.22
         p(parent, "CrateDiagonal", (x, y+size/2, z+size/2+.3), (.4, length, .25), wood, rot=(0, 0, -40))
 
-    def window(parent, x, y, z, w=6, h=7):
+    def window(parent, x, y, z, w=6, h=7, face=1):
         p(parent, "WindowRecess", (x, y, z), (w+.8, h+.8, .4), iron, "metal")
-        pane = p(parent, "AmberWindow", (x, y, z+.25), (w, h, .25), (166, 153, 119), "glass")
+        pane = p(parent, "AmberWindow", (x, y, z+face*.25), (w, h, .25), (166, 153, 119), "glass")
         prop(pane, "float", "Transparency", .15)
         for dx in (-w/2, 0, w/2):
-            p(parent, "WindowMullion", (x+dx, y, z+.5), (.25, h+.5, .4), wood)
+            p(parent, "WindowMullion", (x+dx, y, z+face*.5), (.25, h+.5, .4), wood)
         for dy in (-h/2, 0, h/2):
-            p(parent, "WindowCrossbar", (x, y+dy, z+.5), (w+.5, .3, .4), wood)
-        p(parent, "StoneWindowSill", (x, y-h/2-.5, z+.4), (w+1.8, .8, 1.7), stone, "stone")
+            p(parent, "WindowCrossbar", (x, y+dy, z+face*.5), (w+.5, .3, .4), wood)
+        p(parent, "StoneWindowSill", (x, y-h/2-.5, z+face*.4), (w+1.8, .8, 1.7), stone, "stone")
         for side in (-1, 1):
-            p(parent, "Shutter", (x+side*(w/2+1.15), y, z+.4), (1.6, h, .5), (69, 82, 81))
+            p(parent, "Shutter", (x+side*(w/2+1.15), y, z+face*.4), (1.6, h, .5), (69, 82, 81))
             for dy in (-h/3, h/3):
-                p(parent, "ShutterHinge", (x+side*(w/2+1.15), y+dy, z+.72), (1.7, .2, .2), iron, "metal")
+                p(parent, "ShutterHinge", (x+side*(w/2+1.15), y+dy, z+face*.72), (1.7, .2, .2), iron, "metal")
 
     def flag(parent, x, y, z, tint, w=5, h=8):
         beam(parent, "BannerPole", (x, y-h-2, z), (x, y+1, z), .25, iron, "metal")
@@ -126,11 +128,13 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
     for x, z, w, d, h, title in buildings:
         building = next(i for i in hub.findall("Item") if name(i) == title)
         for child in list(building.findall("Item")):
-            if name(child) in ("Roof", "SignAnchor"):
+            if name(child) in ("RoofAssembly", "SignAnchor"):
                 building.remove(child)
         model = group("Architecture", building)
         accent = (65, 80, 95) if "MARINE" in title else (84, 66, 59)
         y = 8
+        pitched_roof(model, x=x, z=z, width=w, depth=d, wall_top=y+h, accent=accent,
+                     detailed=True, obj=obj, part=part, prop=prop)
         # Foundations, half-timbering and corner quoins; the entry remains open.
         for side in (-1, 1):
             p(model, "StonePlinth", (x+side*w/2, 10, z), (2.8, 4, d+1.2), stone, "stone")
@@ -150,29 +154,15 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
                     p(model, "SideWindowFrame", (xx+side*.5, 20+yy, z+dz), (.4, .3, 6.5), wood)
             for k in range(5):
                 p(model, "CornerQuoin", (x+side*(w/2+.35), 10+k*4, z+d/2+.3), (3, 1.6, 2.8), (135-k*3, 136-k*3, 130-k*3), "stone")
-            # Roof pitch and overlapping slate courses follow the same planes.
-            p(model, "SlateRoof", (x+side*w/4, y+h+4, z), (w/2+5, 1.3, d+8), accent, "slate", (0, 0, -side*22), solid=True)
-            for course in range(5):
-                offset = (course+.5)*(w/2+4)/5
-                rx = x+side*offset
-                ry = y+h+4+(w/4-offset)*math.tan(math.radians(22))+.9
-                p(model, "SlateCourse", (rx, ry, z), ((w/2+4)/5+.25, .25, d+8),
-                  (accent[0]+course*3, accent[1]+course*3, accent[2]+course*3), "slate", (0, 0, -side*22))
-                for tile in range(int(d/7)):
-                    p(model, "SlateJoint", (rx, ry+.13, z-d/2+tile*7), ((w/2+4)/5, .08, .09), iron, "slate", (0, 0, -side*22))
-            p(model, "EaveBeam", (x+side*(w/2+1), 31, z), (1.2, 1.2, d+9), wood)
-            p(model, "RainGutter", (x+side*(w/2+2.5), 30.6, z), (.7, .7, d+9), iron, "metal")
+            p(model, "RainGutter", (x+side*(w/2+3.5), 30.6, z), (.7, .7, d+6), iron, "metal")
             beam(model, "Drainpipe", (x+side*(w/2+2), 9, z-d/2+2), (x+side*(w/2+2), 30, z-d/2+2), .6, iron, "metal")
             window(model, x+side*(w/4+3), 20, z+d/2+1.1, min(6, w/2-11), 7)
+            window(model, x+side*w/4, 20, z-d/2-1.2, 6, 7, face=-1)
             # Entry jambs and lintel frame a twelve-stud wide, nineteen-stud high opening.
             p(model, "DoorJamb", (x+side*6.6, 17, z+d/2+1.4), (1.2, 18, 1.8), stone, "stone")
         p(model, "DoorLintel", (x, 27, z+d/2+1.3), (14.4, 2, 2), stone, "stone")
         p(model, "EntryThreshold", (x, 8.8, z+d/2+2), (12, 1.2, 4), stone, "stone", solid=True)
-        p(model, "RoofRidge", (x, 39, z), (1.4, 1.4, d+10), iron, "slate")
-        # Front gable is a pair of small triangular wedges under the ridge.
-        for side in (-1, 1):
-            part(model, "Gable", (x+side*w/4, 34.5, z+d/2), (1, 7.7, w/2+1), (139, 137, 127), "stone",
-                 (0, -90 if side == 1 else 90, 0), cls="WedgePart", collide=False)
+        p(model, "RearPlinth", (x, 10, z-d/2-.35), (w, 4, 2.7), stone, "stone")
         sign(model, title, x, 30, z+d/2+4, w-6, 3.8)
         lantern(model, x-9, 20, z+d/2+3, light=title in ("ARMES", "FRUITS", "QUARTIER MARINE"))
         p(model, "Chimney", (x-w/3, 37, z-d/4), (4, 13, 4), (95, 91, 85), "brick")
@@ -208,13 +198,15 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
             beam(interiors, "FruitStem", (fx, 17.1, fz), (fx+.35, 18, fz), .2, (65, 87, 51))
 
     streets = group("PavedStreets")
-    for title, x, z, w, d in (("PirateWalk", -75, 98, 130, 10), ("MarineWalk", 75, 98, 130, 10),
+    paths = (("PirateWalk", -75, 98, 130, 10), ("MarineWalk", 75, 98, 130, 10),
                              ("PirateEntry", -130, 86, 12, 26), ("MarineEntry", 130, 86, 12, 26),
                              ("MarketLane", -39, -94, 10, 138), ("MissionLane", 39, -94, 10, 138),
                              ("RearSquare", 0, -128, 90, 45), ("RearLane", 0, -109, 200, 10),
                              ("MarketEntry", -92, -115, 12, 16), ("MissionEntry", 92, -115, 12, 16),
-                             ("ShipyardWalk", -56, 179, 112, 10), ("ShipyardEntry", -112, 174, 12, 16)):
-        part(streets, title, (x, 8.16, z), (w, .3, d), (99, 105, 105), "stone")
+                             ("ShipyardWalk", -56, 179, 112, 10), ("ShipyardEntry", -112, 174, 12, 16))
+    # Tessellate the union once: intersections no longer stack coplanar road faces.
+    for x0, z0, x1, z1 in rectangle_union([(x-w/2, z-d/2, x+w/2, z+d/2) for _, x, z, w, d in paths]):
+        part(streets, "UnifiedWalkway", ((x0+x1)/2, 8.16, (z0+z1)/2), (x1-x0, .3, z1-z0), (99, 105, 105), "stone")
     # Large paving slabs add rhythm, leaving the main spawn-to-quay axis unobstructed.
     for j in range(23):
         for side in (-1, 1):
@@ -231,7 +223,7 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
         p(streets, "PlazaBorder", (40*math.cos(a), 8.5, 40*math.sin(a)), (10, .4, 2), (142, 141, 129), "stone", (0, -angle-90, 0))
     for angle in (0, 90, 180, 270):
         a = math.radians(angle)
-        p(streets, "CompassInlay", (16*math.sin(a), 8.5, 16*math.cos(a)), (2.4, .12, 13), brass, "metal", (0, angle, 0))
+        p(streets, "CompassInlay", (16*math.sin(a), 8.65, 16*math.cos(a)), (2.4, .12, 13), brass, "metal", (0, angle, 0))
     # Hide the bright spawn tile, retaining the original SpawnLocation and position.
     spawn = next(i for i in hub.findall("Item") if name(i) == "CentralSpawn")
     prop(spawn, "float", "Transparency", 1)
@@ -313,9 +305,9 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
     defenses = group("StoneworkAndDefenses")
     for side in (-1, 1):
         for course in range(4):
-            for block in range(7):
-                x = side*(23+block*13)
-                p(defenses, "SeaWallAshlar", (x, 9.5+course*3.2, 200.1), (12.6, 2.9, .5),
+            for block in range(6):
+                x = side*(47+block*12)
+                p(defenses, "SeaWallAshlar", (x, 9.5+course*3.2, 200.3), (11.7, 2.9, .4),
                   (103+course*4+block%3*3, 111+course*3, 115+block%3*2), "stone")
         for dy in range(12, 37, 5):
             for dx in (-7, 7):
@@ -455,4 +447,17 @@ def decorate_hub(hub, *, obj, part, disc, prop, color, vec):
     beam(quay, "CargoCraneBrace", (-35, 20, 291), (-25, 29, 291), .7, wood)
     beam(quay, "CargoRope", (-23, 29, 291), (-23, 16, 291), .15, (143, 122, 82))
     crate(quay, -23, 12, 291, 3.5)
+
+    approaches = group("HarborApproachMarkers")
+    for x, tint in ((-105, (181, 102, 70)), (105, (102, 158, 137))):
+        marker = group("ChannelBuoy", approaches)
+        disc(marker, "BuoyFloat", x, 1, 397, 3, 2, iron, "metal")
+        disc(marker, "BuoyStripe", x, 2.2, 397, 2.7, .6, tint, "metal")
+        beam(marker, "BuoyMast", (x, 2.5, 397), (x, 9, 397), .55, iron, "metal")
+        lantern(marker, x, 10, 397)
+        for j in range(16):
+            a, b = j*math.tau/16, (j+1)*math.tau/16
+            wash = beam(marker, "BuoyWaterline", (x+5*math.sin(a), .15, 397+5*math.cos(a)),
+                        (x+5*math.sin(b), .15, 397+5*math.cos(b)), .13, (126, 158, 162), "glass")
+            prop(wash, "float", "Transparency", .6)
     return detail

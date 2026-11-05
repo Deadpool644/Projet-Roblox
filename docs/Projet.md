@@ -31,6 +31,8 @@ Validation cloud actuelle : neuf tests structurels/disposition, régénération 
 
 ## Prochaine étape
 
+La v0.3 corrige ensuite les pignons et recouvrements signalés par captures, ajoute les façades arrière et remplace l'ambiance sombre par un ciel couvert plus lisible et une brume maritime locale progressive. Voir `Corrections-v0.3.md`. Utiliser maintenant le fichier v0.3 dans `studio/` ; les versions antérieures sont des archives.
+
 Ouvrir la version détaillée dans Studio, contrôler le rendu, les accès et les performances, puis créer un premier bateau pilotable pour éprouver les distances avant de finaliser les autres îles.
 
 Restent à faire dans Studio : rendu, collisions en mouvement, nage, streaming et performances mobile. Aucun de ces tests de jeu n'est déclaré passé.

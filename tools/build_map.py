@@ -5,6 +5,7 @@ import math
 import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from roofing import pitched_roof
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = json.loads((ROOT / "tools/world.json").read_text())
@@ -13,7 +14,7 @@ XML = ET.Element("roblox", version="4")
 COUNT = 0
 MATERIAL = {"grass": 1280, "sand": 1296, "rock": 896, "wood": 528,
             "stone": 880, "plastic": 272, "neon": 288, "metal": 1088,
-            "slate": 800, "glass": 1568, "brick": 848, "fabric": 1312, "ground": 1360}
+            "slate": 800, "glass": 1568, "brick": 848, "fabric": 1312, "ground": 1360, "plaster": 816}
 PALETTE = {"grass": (79, 99, 75), "sand": (157, 151, 130),
            "rock": (77, 85, 94), "wood": (88, 71, 58),
            "stone": (112, 118, 121), "cream": (169, 166, 153), "metal": (62, 69, 77)}
@@ -105,14 +106,16 @@ def label(parent, text, pos, width=180):
 def building(parent, name, x, z, roof=(95, 69, 61), w=38, d=30, h=23, y=8):
     model = obj(parent, "Model", name)
     part(model, "Floor", (x, y+0.5, z), (w, 1, d), "wood", "wood")
-    part(model, "Back", (x, y+h/2, z-d/2), (w, h, 2), "cream")
+    part(model, "Back", (x, y+h/2, z-d/2), (w, h, 2), "cream", "plaster")
     for sign in (-1, 1):
-        part(model, "Side", (x+sign*w/2, y+h/2, z), (2, h, d), "cream")
+        part(model, "Side", (x+sign*w/2, y+h/2, z), (2, h, d), "cream", "plaster")
         # Wide entry, no invisible solid facade obstructing the shop.
-        part(model, "Front", (x+sign*(w/4+3), y+h/2, z+d/2), (w/2-6, h, 2), "cream")
-        part(model, "Roof", (x+sign*w/4, y+h+4, z), (w/2+5, 2, d+8), roof, "wood", (0, 0, -sign*22))
+        part(model, "Front", (x+sign*(w/4+3), y+h/2, z+d/2), (w/2-6, h, 2), "cream", "plaster")
         part(model, "Post", (x+sign*(w/2-2), y+h/2, z+d/2+5), (2, h, 2), "wood", "wood")
     part(model, "Counter", (x, y+3, z-4), (w-8, 6, 4), "wood", "wood")
+    part(model, "EntryHeader", (x, y+h-2.5, z+d/2), (12, 5, 2), "cream", "plaster")
+    pitched_roof(model, x=x, z=z, width=w, depth=d, wall_top=y+h, accent=roof,
+                 detailed=False, obj=obj, part=part, prop=prop)
     label(model, name, (x, y+h+14, z))
     return model
 
@@ -146,7 +149,7 @@ def dock(parent, x, z, r):
 
 
 WORLD = obj(XML, "Model", "Archipelago")
-sea = part(WORLD, "OceanPreview", (0, -0.6, 0), (6144, 1, 6144), (39, 78, 91), "plastic", collide=False)
+sea = part(WORLD, "OceanPreview", (0, -0.6, 0), (6144, 1, 6144), (63, 103, 117), "plastic", collide=False)
 prop(sea, "float", "Transparency", 0.12)
 
 
@@ -182,7 +185,7 @@ def ground(cfg, tint="grass"):
 
 # Hub: clear spawn -> shops -> long main avenue -> central port.
 hub = ground(CONFIG["hub"])
-disc(hub, "SpawnPlaza", 0, 8.2, 0, 42, 0.4, "stone", "stone")
+disc(hub, "SpawnPlaza", 0, 8.36, 0, 42, 0.4, "stone", "stone")
 spawn = part(hub, "CentralSpawn", (0, 8.7, 0), (12, 1, 12), (87, 183, 193), cls="SpawnLocation")
 prop(spawn, "bool", "Neutral", True)
 prop(spawn, "float", "Duration", 0)
@@ -199,10 +202,11 @@ building(hub, "MISSIONS / TUTORIEL", 92, -135, (67, 83, 70), 44, 28)
 fortifications = obj(hub, "Model", "HarborFortifications")
 for side in (-1, 1):
     # A 40-stud opening keeps the main avenue to the pier clear.
-    part(fortifications, "SeaWall", (side*67, 15, 195), (94, 14, 10), "stone")
+    # The curtain starts at the outside of the gate tower, never through it.
+    part(fortifications, "SeaWall", (side*77.5, 15, 195), (73, 14, 10), "stone")
     part(fortifications, "GateTower", (side*31, 23, 188), (20, 30, 24), "rock", "rock")
-    for i in range(8):
-        part(fortifications, "Merlon", (side*(25+i*12), 24, 195), (6, 4, 10), "stone")
+    for i in range(6):
+        part(fortifications, "Merlon", (side*(48+i*12), 24, 195), (6, 4, 10), "stone")
     for dz in (-8, 8):
         part(fortifications, "TowerCrown", (side*31, 40, 188+dz), (22, 4, 5), "stone")
     part(fortifications, "LanternPost", (side*15, 14, 208), (1, 12, 1), "metal", "metal")
@@ -284,5 +288,22 @@ decorate_hub(hub, obj=obj, part=part, disc=disc, prop=prop, color=color, vec=vec
 (ROOT / "assets").mkdir(exist_ok=True)
 ET.indent(XML)
 ET.ElementTree(XML).write(ROOT / "assets/Archipelago.rbxmx", encoding="utf-8", xml_declaration=True)
+# Always available on the client even when the distant islands are streamed out.
+shared = ROOT / "src/shared"
+shared.mkdir(parents=True, exist_ok=True)
+zones = ["-- Generated from tools/world.json by tools/build_map.py.", "local WorldEnvironment = {}", "WorldEnvironment.Islands = {"]
+for cfg in [CONFIG["hub"], *CONFIG["islands"]]:
+    zones.append(f'    {{ X = {cfg["x"]}, Z = {cfg["z"]}, Radius = {cfg["radius"]*1.2+20:.2f}, DockZ = {cfg["z"]+cfg["radius"]+60} }},')
+zones.extend(["}", "", "-- Smooth transition: no ocean fog while on any island or its quay.",
+              "function WorldEnvironment.SeaWeight(x, z)", "    local nearest = math.huge",
+              "    for _, island in ipairs(WorldEnvironment.Islands) do",
+              "        local dx, dz = x - island.X, z - island.Z",
+              "        nearest = math.min(nearest, math.sqrt(dx * dx + dz * dz) - island.Radius)",
+              "        local qx = math.max(math.abs(dx) - 60, 0)",
+              "        local qz = math.max(math.abs(z - island.DockZ) - 60, 0)",
+              "        nearest = math.min(nearest, math.sqrt(qx * qx + qz * qz))",
+              "    end", "    local t = math.clamp((nearest - 35) / 260, 0, 1)",
+              "    return t * t * (3 - 2 * t)", "end", "", "return WorldEnvironment", ""])
+(shared / "WorldEnvironment.luau").write_text("\n".join(zones))
 parts = len(XML.findall(".//Item[@class='Part']")) + len(XML.findall(".//Item[@class='SpawnLocation']"))
 print(f"Generated {len(CONFIG['islands'])+1} islands, {parts} anchored parts, {COUNT} instances")

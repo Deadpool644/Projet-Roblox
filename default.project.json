@@ -4,27 +4,50 @@
     "$className": "DataModel",
     "Workspace": {
       "$properties": { "StreamingEnabled": true, "StreamingMinRadius": 128, "StreamingTargetRadius": 512 },
+      "Terrain": {
+        "$className": "Terrain",
+        "$ignoreUnknownInstances": true,
+        "MaritimeClouds": {
+          "$className": "Clouds",
+          "$properties": { "Cover": 0.76, "Density": 0.52, "Color": [0.76, 0.8, 0.84] }
+        }
+      },
       "Archipelago": { "$path": "assets/Archipelago.rbxmx" }
     },
+    "ReplicatedStorage": { "WorldEnvironment": { "$path": "src/shared/WorldEnvironment.luau" } },
+    "StarterPlayer": { "StarterPlayerScripts": { "MaritimeWeather": { "$path": "src/client/MaritimeWeather.client.luau" } } },
     "ServerScriptService": { "World": { "$path": "src/server" } },
     "Lighting": {
       "$properties": {
-        "ClockTime": 17.2,
-        "Brightness": 2,
-        "Ambient": [0.25, 0.28, 0.32],
-        "OutdoorAmbient": [0.4, 0.43, 0.47],
+        "ClockTime": 15.4,
+        "Brightness": 2.3,
+        "ExposureCompensation": 0.12,
+        "EnvironmentDiffuseScale": 0.65,
+        "EnvironmentSpecularScale": 0.45,
+        "Ambient": [0.27, 0.3, 0.33],
+        "OutdoorAmbient": [0.53, 0.57, 0.6],
         "GlobalShadows": true,
-        "FogColor": [0.48, 0.55, 0.6],
-        "FogStart": 1800,
-        "FogEnd": 6500
+        "ShadowSoftness": 0.3
+      },
+      "MaritimeSky": {
+        "$className": "Sky",
+        "$properties": {
+          "SkyboxBk": "rbxasset://textures/sky/sky512_bk.tex",
+          "SkyboxDn": "rbxasset://textures/sky/sky512_dn.tex",
+          "SkyboxFt": "rbxasset://textures/sky/sky512_ft.tex",
+          "SkyboxLf": "rbxasset://textures/sky/sky512_lf.tex",
+          "SkyboxRt": "rbxasset://textures/sky/sky512_rt.tex",
+          "SkyboxUp": "rbxasset://textures/sky/sky512_up.tex",
+          "CelestialBodiesShown": true, "SunAngularSize": 12, "MoonAngularSize": 9, "StarCount": 500
+        }
       },
       "HarborAtmosphere": {
         "$className": "Atmosphere",
-        "$properties": { "Density": 0.22, "Offset": 0.1, "Color": [0.72, 0.77, 0.8], "Decay": [0.36, 0.43, 0.48], "Haze": 1.2, "Glare": 0.12 }
+        "$properties": { "Density": 0.29, "Offset": 0.05, "Color": [0.75, 0.81, 0.84], "Decay": [0.4, 0.5, 0.57], "Haze": 1.9, "Glare": 0.06 }
       },
       "HarborGrade": {
         "$className": "ColorCorrectionEffect",
-        "$properties": { "Brightness": 0.01, "Contrast": 0.09, "Saturation": -0.1, "TintColor": [1, 0.97, 0.93] }
+        "$properties": { "Brightness": 0.015, "Contrast": 0.04, "Saturation": -0.05, "TintColor": [0.97, 0.99, 1] }
       },
       "LanternBloom": {
         "$className": "BloomEffect",
